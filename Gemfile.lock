@@ -1,0 +1,15 @@
+GEM
+  remote: http://rubygems.org/
+  specs:
+    distance_measures (0.0.6)
+    ruby_native_statistics (0.7.1)
+
+PLATFORMS
+  ruby
+
+DEPENDENCIES
+  distance_measures
+  ruby_native_statistics
+
+BUNDLED WITH
+   1.12.5
