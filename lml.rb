@@ -17,7 +17,7 @@ module LML
     end
   end
 
-  class NBC
+  class NB
     def initialize(data)
       @data_rows = []
       data_count = data[0][:data].count
