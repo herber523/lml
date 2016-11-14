@@ -22,6 +22,20 @@ module LML
       @data_rows = load_data(data)
     end
 
+    def classify(input)
+      nbc = []
+      @data_rows.each do |data_row|
+        evidence = 1
+        data_row[:mean].zip(data_row[:variance], input[:data]) do |mean, variance, input|
+          evidence *= pdf(input, mean, variance)
+        end
+        nbc << { type: data_row[:type], num: evidence }
+      end
+      nbc
+    end
+
+    private
+
     def load_data(data)
       data_rows = []
       data_count = data[0][:data].count
@@ -43,18 +57,6 @@ module LML
       data_rows
     end
 
-    def classify(input)
-      nbc = []
-      @data_rows.each do |data_row|
-        evidence = 1
-        data_row[:mean].zip(data_row[:variance], input[:data]) do |mean, variance, input|
-          evidence *= pdf(input, mean, variance)
-        end
-        nbc << { type: data_row[:type], num: evidence }
-      end
-      nbc
-    end
-
     def pdf(n, mean, variance)
       (1 / Math.sqrt(3.1415 * variance)) * Math.exp(-((n - mean)**2) / variance)
     end
@@ -62,8 +64,27 @@ module LML
 
   class APRIORI
     def initialize(data)
-      @data = data.map{|n| n[:data]}
+      @data = data.map { |n| n[:data] }
     end
+
+    def apriori(min_support)
+      data = @data
+      c1 = find_item
+      l1, support_data = find_support(data, c1, min_support)
+      l = [l1]
+      k = 0
+      while l[k].count > 0
+        ck = apriori_gen(l[k], k)
+        lk, supk = find_support(data, ck, min_support)
+        support_data = support_data.merge(supk)
+        l << lk
+        k += 1
+      end
+      [l, support_data]
+    end
+
+    private
+
     def find_item
       set = []
       @data.each do |transction|
@@ -73,6 +94,7 @@ module LML
       end
       set.sort
     end
+
     def find_support(d, ck, min_support)
       sscnt = {}
       d.each do |tid|
@@ -94,6 +116,7 @@ module LML
       end
       [retlist, support_data]
     end
+
     def apriori_gen(l1, k)
       d = []
       lc = l1.count
@@ -107,21 +130,6 @@ module LML
         end
       end
       d.sort
-    end
-    def apriori(min_support)
-      data = @data
-      c1 = find_item
-      l1, support_data = find_support(data, c1, min_support)
-      l = [l1]
-      k = 0
-      while l[k].count > 0
-        ck = apriori_gen(l[k], k)
-        lk, supk = find_support(data, ck, min_support)
-        support_data = support_data.merge(supk)
-        l << lk
-        k += 1
-      end
-      [l, support_data]
     end
   end
 end
